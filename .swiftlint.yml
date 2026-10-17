@@ -1,0 +1,154 @@
+# Root SwiftLint configuration mapping strict Go linting standards (golangci-lint) to Swift.
+strict: true
+
+excluded:
+  - .build
+  - "*/.build"
+  - "*/*/.build"
+  - .scratch
+  - vendor
+  - TestData
+
+opt_in_rules:
+  # Error handling & safety (errcheck, errorlint, nilerr, gosec)
+  - force_unwrapping
+  - force_try
+  - force_cast
+  - fatal_error_message
+  - unhandled_throwing_task
+
+  # Complexity & structure (gocognit, funlen, dupl)
+  - cyclomatic_complexity
+  - function_body_length
+  - type_body_length
+  - file_length
+  - nesting
+
+  # Idiomatic style & readability (revive, gocritic, staticcheck)
+  - empty_count
+  - empty_string
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - contains_over_range_nil_comparison
+  - first_where
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - toggle_bool
+  - unneeded_break_in_switch
+  - unneeded_parentheses_in_closure_argument
+  - vertical_whitespace_closing_braces
+  - vertical_whitespace_opening_braces
+  - multiline_parameters
+  - multiline_arguments
+  - sorted_imports
+  - modifier_order
+
+  # Unused / dead code / waste (unused, ineffassign, wastedassign, unparam)
+  - unused_enumerated
+  - unused_optional_binding
+  - unused_parameter
+  - duplicate_enum_cases
+  - redundant_discardable_let
+  - redundant_void_return
+
+  # Declaration & Member Ordering
+  - type_contents_order
+
+  # Modernization & idioms (modernize, usestdlibvars)
+  - prefer_self_in_static_references
+  - prefer_zero_over_explicit_init
+  - legacy_random
+  - legacy_constant
+  - legacy_constructor
+
+# These require swiftlint analyze with a clean build's compiler log.
+analyzer_rules:
+  - unused_declaration
+  - unused_import
+
+# Rule Configurations matching golangci-lint settings
+
+# funlen: lines: 80
+# Omit funlen's 50-statement limit because SwiftLint has no built-in statement-count rule.
+function_body_length:
+  error: 80
+
+# funlen equivalent for whole files and types
+file_length:
+  warning: 400
+  error: 800
+
+type_body_length:
+  warning: 250
+  error: 400
+
+# Approximate gocognit's cognitive complexity check with cyclomatic complexity.
+# The metrics differ, so these thresholds are not equivalent to Go's limit of 30.
+# Track SwiftLint's cognitive complexity rule request: https://github.com/realm/SwiftLint/issues/3335
+cyclomatic_complexity:
+  warning: 15
+  error: 30
+
+# nesting: prevent excessive nesting depth
+nesting:
+  type_level:
+    warning: 2
+    error: 3
+  function_level:
+    warning: 4
+    error: 5
+
+# Force unwraps and casts should be treated strictly as errors (errcheck / nilnesserr / gosec)
+force_unwrapping: error
+force_try: error
+force_cast: error
+
+# Identifier naming conventions (revive: var-naming)
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 40
+    error: 60
+  excluded:
+    - id
+    - x
+    - y
+    - dx
+    - dy
+    - i
+    - j
+    - k
+
+# Line length
+line_length:
+  warning: 120
+  error: 140
+  ignores_urls: true
+  ignores_function_declarations: false
+  ignores_comments: true
+
+# Order type members logically from properties to initializers to methods
+type_contents_order:
+  order:
+    - [case]
+    - [type_alias, associated_type]
+    - [subtype]
+    - [type_property]
+    - [instance_property]
+    - [ib_outlet]
+    - [initializer, deinitializer]
+    - [type_method]
+    - [view_life_cycle_method]
+    - [ib_action]
+    - [other_method]
+    - [subscript]
+
+# Custom regex rules for patterns not covered by built-in linters
+custom_rules:
+  no_direct_nslog:
+    name: "Direct NSLog"
+    regex: 'NSLog\('
+    message: "Prefer unified OSLog/Logger over legacy NSLog."
+    severity: warning
